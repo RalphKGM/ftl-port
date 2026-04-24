@@ -23,6 +23,9 @@ First half completed in this turn
 Second half to do next
 
 - [ ] Reproduce the upstream macOS build path on a real macOS machine or clean macOS CI run
+- [x] Isolate the current macOS build blocker to `sdl2` `2.0.22#1` and prepare a pinned local overlay patch for the macOS HIDAPI C89 compile failure
+- [x] Remove SDL2's `-Werror=declaration-after-statement` gate for the macOS overlay build so current AppleClang can get through the old Darwin sources
+- [ ] Finish SDL2 on Apple Silicon hosts by forcing the Objective-C compilation path to stay `x86_64` instead of mixing `arm64` and `x86_64` objects in `libSDL2d.a`
 - [ ] Build both `Hyperspace.1.6.12.amd64.dylib` and `Hyperspace.1.6.13.amd64.dylib`
 - [ ] Run or adapt upstream darwin tests against real FTL binaries
 - [ ] Produce the missing `FTL.Hyperspace.<version>-MacOS.zip` package
