@@ -1,3 +1,6 @@
 tmp/
+runtime-downloads/
+work/
+artifacts/
 upstream/
 .DS_Store

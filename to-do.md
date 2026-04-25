@@ -22,18 +22,23 @@ First half completed in this turn
 
 Second half to do next
 
-- [ ] Reproduce the upstream macOS build path on a real macOS machine or clean macOS CI run
+- [x] Reproduce the upstream macOS build path on a real macOS machine or clean macOS CI run
 - [x] Isolate the current macOS build blocker to `sdl2` `2.0.22#1` and prepare a pinned local overlay patch for the macOS HIDAPI C89 compile failure
 - [x] Remove SDL2's `-Werror=declaration-after-statement` gate for the macOS overlay build so current AppleClang can get through the old Darwin sources
-- [ ] Finish SDL2 on Apple Silicon hosts by forcing the Objective-C compilation path to stay `x86_64` instead of mixing `arm64` and `x86_64` objects in `libSDL2d.a`
-- [ ] Build both `Hyperspace.1.6.12.amd64.dylib` and `Hyperspace.1.6.13.amd64.dylib`
-- [ ] Run or adapt upstream darwin tests against real FTL binaries
-- [ ] Produce the missing `FTL.Hyperspace.<version>-MacOS.zip` package
+- [x] Finish SDL2 on Apple Silicon hosts by forcing the Objective-C compilation path to stay `x86_64` instead of mixing `arm64` and `x86_64` objects in `libSDL2d.a`
+- [x] Build both `Hyperspace.1.6.12.amd64.dylib` and `Hyperspace.1.6.13.amd64.dylib`
+- [x] Adapt a local darwin smoke-test entrypoint for real FTL binaries
+- [x] Produce the missing `FTL.Hyperspace.<version>-MacOS.zip` package
 - [ ] Validate native installation into `FTL.app` for Steam 1.6.13 and GOG 1.6.12/1.6.13 if supported
 - [ ] Upstream the packaging or release fixes so macOS artifacts are published with normal releases
 
 Open questions
 
-- [ ] Is the latest source branch fully green for macOS, or are the workflows/build scripts newer than the last shipped public release?
+- [x] Is the latest source branch fully green for macOS, or are the workflows/build scripts newer than the last shipped public release?
 - [ ] Is Apple Silicon support meant to be Rosetta-only for the game binary with x86_64 Hyperspace, or is there a longer-term arm64 plan?
 - [ ] Which exact macOS versions are considered supported by the current upstream toolchain?
+
+Current answers
+
+- [x] Source is ahead of the latest shipped public release: local checkout metadata is `1.22.0`, while the latest public release audited was `v1.21.1`
+- [ ] A real local `FTL.app` is still required for final install validation and smoke testing
