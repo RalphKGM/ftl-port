@@ -49,6 +49,36 @@ You can also choose the output path explicitly:
 ./scripts/install_native_multiverse_macos.sh "/path/to/FTL.app" "/path/to/FTL Multiverse.app"
 ```
 
+## Add extra mods later
+
+Once the base app is working, you can patch extra `.ftl` mods into that app in the order you want them loaded:
+
+```bash
+./scripts/add_mods_to_macos_app.sh "/path/to/FTL Multiverse.app" /path/to/mod1.ftl [/path/to/mod2.ftl ...]
+```
+
+That helper modifies the target app in place, keeps a one-time backup of the pre-extra-mods `ftl.dat`, and re-signs the app afterward.
+
+## Update pinned versions later
+
+The repo now keeps its validated version pins in one place:
+
+```bash
+./scripts/update_pinned_versions.sh --show
+```
+
+When a new `Multiverse` release or `Hyperspace` ref comes out, update the pins, rebuild, and re-test before treating it as stable:
+
+```bash
+./scripts/update_pinned_versions.sh \
+  --mv-assets-version "NEW_ASSETS_TAG" \
+  --mv-assets-file "NEW_ASSETS_FILE.zip" \
+  --mv-data-version "NEW_DATA_TAG" \
+  --mv-data-file "NEW_DATA_FILE.zip"
+./scripts/build_upstream_native_macos.sh
+./scripts/run_upstream_native_macos_smoke_test.sh "/path/to/FTL.app"
+```
+
 ## What the installer does
 
 The script will:
@@ -68,6 +98,10 @@ The script will:
 - the source app is not modified
 - the installer refuses to overwrite an existing output app
 - large downloads and temporary files live under `tmp/`, which is ignored by Git
+
+## Bugs and troubleshooting
+
+See [BUGS.md](/Users/ralph/projects/ftl-mv/BUGS.md) for the current troubleshooting guide and known limitations.
 
 ## Verified result
 

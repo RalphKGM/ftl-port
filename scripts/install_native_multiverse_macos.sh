@@ -4,18 +4,8 @@ set -euo pipefail
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 REPO_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
 
-STAGE_ROOT="$REPO_ROOT/tmp/native-macos-multiverse"
-DOWNLOAD_DIR="$STAGE_ROOT/downloads"
-FTLMAN_DIR="$STAGE_ROOT/ftlman"
-
-FTLMAN_VERSION="v0.7.2"
-FTLMAN_AARCH64_URL="https://github.com/afishhh/ftlman/releases/download/${FTLMAN_VERSION}/ftlman-aarch64-apple-darwin.tar.gz"
-FTLMAN_X86_64_URL="https://github.com/afishhh/ftlman/releases/download/${FTLMAN_VERSION}/ftlman-x86_64-apple-darwin.tar.gz"
-
-MV_ASSETS_VERSION="v5.5"
-MV_DATA_VERSION="v5.5.1"
-MV_ASSETS_URL="https://github.com/FTL-Multiverse-Team/FTL-Multiverse-Releases/releases/download/${MV_ASSETS_VERSION}/Multiverse.5.5.-.Assets.Patch.above.Data.zip"
-MV_DATA_URL="https://github.com/FTL-Multiverse-Team/FTL-Multiverse-Releases/releases/download/${MV_DATA_VERSION}/Multiverse.5.5.1.-.Data.zip"
+# shellcheck source=./common.sh
+source "$SCRIPT_DIR/common.sh"
 
 usage() {
     cat >&2 <<'EOF'
@@ -36,34 +26,6 @@ Safety:
   - the script refuses to overwrite an existing output app
 EOF
     exit 1
-}
-
-log() {
-    printf '%s\n' "$*"
-}
-
-download_file() {
-    local url="$1"
-    local dest="$2"
-
-    if [ -f "$dest" ]; then
-        return
-    fi
-
-    mkdir -p "$(dirname "$dest")"
-    curl -L --fail --retry 3 --output "${dest}.part" "$url"
-    mv "${dest}.part" "$dest"
-}
-
-set_bundle_executable() {
-    local plist_path="$1"
-    local value="$2"
-
-    if /usr/libexec/PlistBuddy -c "Set :CFBundleExecutable $value" "$plist_path" >/dev/null 2>&1; then
-        return
-    fi
-
-    /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string $value" "$plist_path"
 }
 
 if [ $# -lt 1 ] || [ $# -gt 2 ]; then
@@ -116,42 +78,12 @@ case "$FTL_VERSION" in
         ;;
 esac
 
-mkdir -p "$DOWNLOAD_DIR" "$FTLMAN_DIR"
+MV_ASSETS_ZIP="$DOWNLOAD_DIR/$MV_ASSETS_FILE"
+MV_DATA_ZIP="$DOWNLOAD_DIR/$MV_DATA_FILE"
 
-ARCH="$(uname -m)"
-case "$ARCH" in
-    arm64)
-        FTLMAN_URL="$FTLMAN_AARCH64_URL"
-        FTLMAN_TARBALL="$DOWNLOAD_DIR/ftlman-aarch64-apple-darwin.tar.gz"
-        ;;
-    x86_64)
-        FTLMAN_URL="$FTLMAN_X86_64_URL"
-        FTLMAN_TARBALL="$DOWNLOAD_DIR/ftlman-x86_64-apple-darwin.tar.gz"
-        ;;
-    *)
-        echo "Unsupported host architecture: $ARCH" >&2
-        exit 1
-        ;;
-esac
-
-MV_ASSETS_ZIP="$DOWNLOAD_DIR/Multiverse.5.5.-.Assets.Patch.above.Data.zip"
-MV_DATA_ZIP="$DOWNLOAD_DIR/Multiverse.5.5.1.-.Data.zip"
-
-download_file "$FTLMAN_URL" "$FTLMAN_TARBALL"
+prepare_ftlman
 download_file "$MV_ASSETS_URL" "$MV_ASSETS_ZIP"
 download_file "$MV_DATA_URL" "$MV_DATA_ZIP"
-
-if [ ! -x "$FTLMAN_DIR/ftlman/ftlman" ]; then
-    rm -rf "$FTLMAN_DIR"
-    mkdir -p "$FTLMAN_DIR"
-    tar -xzf "$FTLMAN_TARBALL" -C "$FTLMAN_DIR"
-fi
-
-FTLMAN_BIN="$FTLMAN_DIR/ftlman/ftlman"
-if [ ! -x "$FTLMAN_BIN" ]; then
-    echo "Failed to prepare ftlman CLI at $FTLMAN_BIN" >&2
-    exit 1
-fi
 
 log "Building native macOS Hyperspace artifacts..."
 "$REPO_ROOT/scripts/build_upstream_native_macos.sh"
@@ -187,8 +119,7 @@ chmod 755 "$OUTPUT_APP/Contents/MacOS/Hyperspace.command"
 set_bundle_executable "$OUTPUT_APP/Contents/Info.plist" "Hyperspace.command"
 
 log "Re-signing app bundle..."
-codesign -f -s - --timestamp=none --all-architectures --deep "$OUTPUT_APP"
-codesign --verify --deep --strict "$OUTPUT_APP"
+resign_app "$OUTPUT_APP"
 
 log ""
 log "Done."

@@ -7,7 +7,10 @@ UPSTREAM_ROOT="$REPO_ROOT/upstream/FTL-Hyperspace"
 METADATA_PATH="$UPSTREAM_ROOT/Mod Files/mod-appendix/metadata.xml"
 CMAKE_PATH="$UPSTREAM_ROOT/CMakeLists.txt"
 HYPERSPACE_REPO_URL="${HYPERSPACE_REPO_URL:-https://github.com/FTL-Hyperspace/FTL-Hyperspace.git}"
-HYPERSPACE_REF="${HYPERSPACE_REF:-55f0d96a4746e4ac6fc67110070a41264321437a}"
+
+# shellcheck source=./versions.sh
+source "$SCRIPT_DIR/versions.sh"
+HYPERSPACE_REF="${HYPERSPACE_REF_OVERRIDE:-$HYPERSPACE_REF}"
 
 clone_upstream_if_missing() {
     if [ -d "$UPSTREAM_ROOT/.git" ]; then

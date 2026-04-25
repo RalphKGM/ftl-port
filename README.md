@@ -69,8 +69,12 @@ Validated content/tool versions:
 
 - `scripts/install_native_multiverse_macos.sh`
   - one-shot installer for end users
+- `scripts/add_mods_to_macos_app.sh`
+  - patch extra `.ftl` mods into an existing app bundle
 - `scripts/build_upstream_native_macos.sh`
   - build/package native macOS `Hyperspace` only
+- `scripts/update_pinned_versions.sh`
+  - update the repo's pinned Hyperspace, Multiverse, and `ftlman` versions
 - `scripts/run_upstream_native_macos_smoke_test.sh`
   - advanced validation against a real `FTL.app`
 
@@ -79,6 +83,7 @@ Validated content/tool versions:
 See:
 
 - `docs/native-macos-multiverse.md`
+- `BUGS.md`
 
 ## Notes
 
