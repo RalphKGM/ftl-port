@@ -1,69 +1,92 @@
 # ftl-port
 
-This repo tracks the native macOS `FTL: Hyperspace` path, with a focus on turning upstream macOS support into a release process that is easy to verify and ship.
+Install native macOS `FTL: Multiverse` into the real Mac `FTL.app`.
 
-## Current status
+This repo builds native macOS `Hyperspace`, downloads the validated `Multiverse` files, patches a duplicate `FTL.app`, and re-signs the result so it launches from Finder.
 
-The old "borderline impossible" reputation is outdated.
+## Quick Start
 
-Upstream `FTL-Hyperspace` already contains a native macOS target in source:
-
-- `FTLGameMacOSAMD64.cpp` and `FTLGameMacOSAMD64.h`
-- `APPLE` branches in `CMakeLists.txt`
-- darwin toolchains, triplets, build scripts, tests, and GitHub Actions workflows
-- a native Mac installation guide under `Release Files/MacOS/README.txt`
-
-As of this workspace run on `2026-04-25` in `Asia/Manila`, we have now proven that the native macOS release path builds on Apple Silicon for `x86_64`/Rosetta-targeted FTL:
-
-- `Hyperspace.1.6.12.amd64.dylib` builds successfully
-- `Hyperspace.1.6.13.amd64.dylib` builds successfully
-- upstream `buildscripts/ci/package-macos.sh` produces `FTL.Hyperspace.1.22.0-MacOS.zip`
-
-The main public-release gap is still packaging and publishing upstream: the latest upstream release asset we audited, `v1.21.1` published on `2026-01-25`, ships a single zip containing Windows and Linux payloads, but not the dedicated macOS zip that the source tree already knows how to build.
-
-That means the main remaining work is:
-
-1. validate the native package against a real local `FTL.app`
-2. confirm the install flow for Steam and GOG app bundles
-3. upstream the macOS release packaging so normal releases publish it
-
-## Repo contents
-
-- `to-do.md`: working checklist for the native macOS track
-- `docs/upstream-status.md`: notes from the upstream audit
-- `docs/native-macos-multiverse.md`: shareable native macOS Multiverse workflow
-- `scripts/audit_upstream_macos.sh`: quick audit of source support and release packaging
-- `scripts/build_upstream_native_macos.sh`: build both macOS dylibs and package the current source version
-- `scripts/install_native_multiverse_macos.sh`: one-shot install of native Mac Multiverse into a duplicated `FTL.app`
-- `scripts/run_upstream_native_macos_smoke_test.sh`: run the upstream darwin smoke test against a real `FTL.app`
-
-## Usage
-
-Run the audit:
-
-```bash
-./scripts/audit_upstream_macos.sh
-```
-
-Build and package native macOS artifacts:
-
-```bash
-./scripts/build_upstream_native_macos.sh
-```
-
-Install native macOS Multiverse into a duplicate app bundle:
+1. Clone this repo
+2. Make sure you have a Mac `FTL.app`
+3. Make sure Xcode Command Line Tools are installed
+4. Run:
 
 ```bash
 ./scripts/install_native_multiverse_macos.sh "/path/to/FTL.app"
 ```
 
-Smoke-test against a real local app bundle when available:
+Example:
 
 ```bash
-./scripts/run_upstream_native_macos_smoke_test.sh "/path/to/FTL.app"
+./scripts/install_native_multiverse_macos.sh "/Users/yourname/Documents/FTL Advanced Edition.app"
 ```
 
-## Scope
+By default this creates a sibling app named:
 
-This repo is still a coordination and verification workspace rather than a full upstream fork.
-The native macOS build/package path is now working locally, but the final install validation step still needs a real `FTL.app`.
+```bash
+FTL Multiverse.app
+```
+
+Your original app is left untouched.
+
+## What It Does
+
+The installer script:
+
+- clones the pinned upstream `FTL-Hyperspace` source if needed
+- builds native macOS `Hyperspace` for `FTL 1.6.12` and `1.6.13`
+- downloads the validated `Multiverse` release files
+- duplicates your `FTL.app`
+- patches the duplicate app's `ftl.dat`
+- installs `Hyperspace.command` and the matching macOS `.dylib`
+- updates `CFBundleExecutable`
+- re-signs the final app with ad-hoc `codesign`
+
+## Supported Inputs
+
+Currently validated in this repo:
+
+- macOS `FTL.app`
+- `FTL 1.6.12`
+- `FTL 1.6.13`
+- Apple Silicon and Intel hosts
+
+Validated content/tool versions:
+
+- `FTL-Hyperspace` source ref: `55f0d96a4746e4ac6fc67110070a41264321437a`
+- `Multiverse` assets: `v5.5`
+- `Multiverse` data: `v5.5.1`
+- `ftlman`: `v0.7.2`
+
+## Requirements
+
+- macOS
+- a real `FTL.app` bundle
+- internet access for first-run downloads
+- Xcode Command Line Tools
+
+## Scripts
+
+- `scripts/install_native_multiverse_macos.sh`
+  - one-shot installer for end users
+- `scripts/build_upstream_native_macos.sh`
+  - build/package native macOS `Hyperspace` only
+- `scripts/run_upstream_native_macos_smoke_test.sh`
+  - advanced validation against a real `FTL.app`
+
+## More Info
+
+See:
+
+- `docs/native-macos-multiverse.md`
+
+## Notes
+
+- Large downloads and build artifacts live under `tmp/` and `upstream/`, which are ignored by Git.
+- The installer refuses to overwrite an existing output app.
+- If you want a fresh build cache, delete `tmp/` and `upstream/` and run the installer again.
+- If macOS complains after moving the final app elsewhere, re-run:
+
+```bash
+codesign -f -s - --timestamp=none --all-architectures --deep "/path/to/FTL Multiverse.app"
+```
