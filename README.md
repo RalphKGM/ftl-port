@@ -1,4 +1,4 @@
-# ftl-port
+# ftl-multiverse-mac
 
 Install native macOS `FTL: Multiverse` into the real Mac `FTL.app`.
 
